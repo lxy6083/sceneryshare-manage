@@ -1,0 +1,38 @@
+html,
+body,
+#app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.pro_ct_dis .distpicker-address-wrapper select {
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 12px;
+    outline: none;
+    width: 32%;
+    height: 30px;
+}
+
+
+/*表单样式*/
+
+.el-select {
+    width: 100%;
+}
+
+.table {
+    min-width: 800px;
+}
+
+.el-dialog__body {
+    padding: 10px 20px 0px 10px;
+}
