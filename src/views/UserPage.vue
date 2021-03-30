@@ -3,7 +3,7 @@
     <!-- 操作区域 -->
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
+        <el-button type="danger" size="mini" @click="delAll">批量删除</el-button>
         <el-input v-model="select_word" size="mini" placeholder="筛选相关用户" class="handle-input"></el-input>
         <el-button type="primary" size="mini" @click="centerDialogVisible = true">添加用户</el-button>
       </div>
@@ -39,10 +39,17 @@
           {{getLocation(scope.row.province, scope.row.city, scope.row.district)}}
         </template>
       </el-table-column>
-      <el-table-column label="动态管理" align="center">
+      <el-table-column prop="flag" label="锁定" align="center" width="200">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="sceneryEdit(scope.row.id,scope.row.username)">景区动态</el-button>
-          <el-button size="mini" type="primary" @click="casualEdit(scope.row.id,scope.row.username)">随拍动态</el-button>
+          <el-switch
+            v-model="scope.row.flag"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="锁定"
+            inactive-text="解锁"
+            @change="toggleFlag(scope.row.flag, scope.row.id)"
+          >
+          </el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="120">
@@ -54,12 +61,12 @@
     </el-table>
     <!-- 分页组件 -->
     <div class="pagination">
-      <el-pagination 
+      <el-pagination
         background
-        layout="total,prev,pager,next" 
-        :current-page="currentPage" 
-        :page-size="pageSize" 
-        :total="tableData.length" 
+        layout="total,prev,pager,next"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :total="tableData.length"
         @current-change="handleCurrentChange"
       >
       </el-pagination>
@@ -98,7 +105,7 @@
       </span>
     </el-dialog>
     <!-- 修改弹框区域 -->
-    <el-dialog title="添加用户" :visible.sync="editDialogVisible" width="400px" center>
+    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="400px" center>
       <el-form :model="editForm" ref="editForm" label-width="80px" :rules="editRules">
         <el-form-item prop="username" label="用户名" size="mini">
           <el-input v-model="editForm.username" placeholder="1-11位字符"></el-input>
@@ -139,7 +146,7 @@
 </template>
 
 <script>
-import {deleteUser, getAllUser, setUser, updateUser} from '../api/index';
+import {deleteUser, getAllUser, isLocked, setUser, updateUser} from '../api/index';
 import {mixin} from '../mixins/index';
 import VDistpicker from 'v-distpicker';
 export default {
@@ -258,16 +265,6 @@ export default {
     }
   },
   methods: {
-    //转向随拍动态管理页面
-    casualEdit(id,name) {
-      this.$router.push({
-        path: '/casual',
-        query: {
-          id,
-          name
-        }
-      })
-    },
     //转向风景动态管理页面
     sceneryEdit(id,name) {
       this.$router.push({
@@ -280,6 +277,7 @@ export default {
     },
     //删除用户
     delRow() {
+      console.log(this.index);
       deleteUser(this.index)
       .then(res => {
         if (res == 1) {
@@ -418,6 +416,23 @@ export default {
     //更新图片
     uploadUrl(id) {
       return `${this.$store.state.HOST}/user/updateUserAvatar?id=${id}`;
+    },
+    //切换用户是否锁定
+    toggleFlag(flag,id) {
+      isLocked(flag, id)
+      .then(res => {
+        if (res === true) {
+          this.notify('状态切换成功','success');
+          this.getData();
+        } else {
+          this.notify('状态切换失败','error');
+          this.getData();
+        }
+      })
+      .catch(err => {
+        this.notify(err,'error');
+        this.getData();
+      })
     }
   }
 }

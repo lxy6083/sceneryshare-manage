@@ -15,7 +15,7 @@
                     </div>
                 </el-form-item>
             </el-form>
-        </div>      
+        </div>
   </div>
 </template>
 
@@ -47,12 +47,14 @@ export default {
         params.append("password",this.ruleForm.password);
         getLoginStatus(params)
           .then(res => {
-              if(res.code == 1) {
+              if(res.code === 1) {
                 localStorage.setItem('username',this.ruleForm.username);
-                this.$router.push('/info');
-                this.notify("登陆成功","success");
+                localStorage.setItem('adminId',res.adminMsg.id);
+                console.log('adminId',localStorage.getItem('adminId'));
+                this.$router.push('/sceneryManagement');
+                this.notify(res.msg,"success");
               }else {
-                this.notify("登录失败","error");
+                this.notify(res.msg,"error");
               }
           });
       }

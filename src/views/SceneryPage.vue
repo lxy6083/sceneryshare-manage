@@ -4,13 +4,46 @@
     <div class="container">
       <div class="handle-box">
         <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
-        <el-input v-model="select_word" size="mini" placeholder="筛选相关内容" class="handle-input"></el-input>
+        <el-input v-model="select_word" size="mini" placeholder="筛选用户" class="handle-input"></el-input>
+        <el-select
+          v-model="sort.sortName"
+          placeholder="请选择排序字段"
+          class="handle-select"
+          size="mini"
+          @change="handleSort()">
+          <el-option
+            v-for="item in sortNameOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+
+        <el-select
+          v-model="sort.type"
+          placeholder="请选择排序方式"
+          class="handle-select"
+          size="mini"
+          @change="handleSort()">
+          <el-option
+            v-for="item in typeOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
       </div>
     </div>
     <!-- 列表区域 -->
     <el-table size="mini" ref="multipleTable" border style="width:100%" height="680px" :data="data" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="40"></el-table-column>
-      <el-table-column prop="content" label="文字内容" align="center"></el-table-column>
+      <el-table-column prop="username" label="用户名" align="center" width="100"></el-table-column>
+      <el-table-column prop="title" label="标题" align="center" width="120"></el-table-column>
+      <el-table-column prop="content" label="文字内容" align="left">
+        <template slot-scope="scope">
+          <div v-html="scope.row.content"></div>
+        </template>
+      </el-table-column>
       <el-table-column prop="pic" label="图片/小视频" align="center" width="120">
         <template slot-scope="scope">
           <div class="pic" v-if="scope.row.pic.toLowerCase().endsWith('jpg')||scope.row.pic.toLowerCase().endsWith('jpeg')||scope.row.pic.toLowerCase().endsWith('png')||scope.row.pic.toLowerCase().endsWith('gif')">
@@ -21,36 +54,131 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="地址" align="center">
+      <el-table-column prop="sceneryName" label="景点名称" align="center"></el-table-column>
+      <el-table-column prop="weather" label="天气" align="center" width="120">
         <template slot-scope="scope">
-          {{getScenery(scope.row.province, scope.row.city, scope.row.district, scope.row.scenery)}}
+          {{ changeWeather(scope.row.weather) }}
         </template>
       </el-table-column>
-      <el-table-column prop="weather" label="天气" align="center" width="50"></el-table-column>
-      <el-table-column prop="timeBucket" label="时段" align="center" width="50"></el-table-column>
-      <el-table-column prop="season" label="季节" align="center" width="50"></el-table-column>
-      <el-table-column prop="bearing" label="方位" align="center" width="50"></el-table-column>
-      <el-table-column prop="up" label="点赞数" align="center" width="50"></el-table-column>
-      <el-table-column prop="createTime" label="创建时间" align="center" width="120"></el-table-column>
-      <el-table-column prop="updateTime" label="修改时间" align="center" width="120"></el-table-column>
+      <el-table-column prop="timeBucket" label="时段" align="center" width="120">
+        <template slot-scope="scope">
+          {{ changeTimeBucket(scope.row.timeBucket) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="season" label="季节" align="center" width="50">
+        <template slot-scope="scope">
+          {{ changeSeason(scope.row.season) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="bearing" label="方位" align="center" width="50">
+        <template slot-scope="scope">
+          {{ changeBearing(scope.row.bearing) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="essence" label="设置/取消精华" align="center" width="160">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.essence"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="精华"
+            inactive-text="非精华"
+            @change="toggleEssence(scope.row.essence, scope.row.id)"
+          >
+          </el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column prop="visible" label="审核" align="center" width="160">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.visible"
+            :active-value="1"
+            :inactive-value="0"
+            active-text="可见"
+            inactive-text="不可见"
+            @change="toggleVisible(scope.row.visible, scope.row.id)"
+          >
+          </el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" width="120">
         <template slot-scope="scope">
+          <el-button size="mini" type="primary" icon="el-icon-edit" circle @click="handleEdit(scope.row)"></el-button>
           <el-button size="mini" type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.row.id)"></el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 分页组件 -->
     <div class="pagination">
-      <el-pagination 
+      <el-pagination
         background
-        layout="total,prev,pager,next" 
-        :current-page="currentPage" 
-        :page-size="pageSize" 
-        :total="tableData.length" 
+        layout="total,prev,pager,next"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :total="tableData.length"
         @current-change="handleCurrentChange"
       >
       </el-pagination>
     </div>
+    <!-- 修改弹框区域 -->
+    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="400px" center>
+      <el-form :model="editForm" ref="editForm" label-width="80px">
+        <el-form-item prop="sceneryId" label="景点" size="mini">
+          <el-select v-model="editForm.sceneryId" placeholder="请选择">
+            <el-option
+              v-for="item in scenery"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="weather" label="天气" size="mini">
+          <el-select v-model="editForm.weather" placeholder="请选择">
+            <el-option
+              v-for="item in weather"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="timeBucket" label="时段" size="mini">
+          <el-select v-model="editForm.timeBucket" placeholder="请选择">
+            <el-option
+              v-for="item in timeBucket"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="season" label="季节" size="mini">
+          <el-select v-model="editForm.season" placeholder="请选择">
+            <el-option
+              v-for="item in season"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="bearing" label="方位" size="mini">
+          <el-select v-model="editForm.bearing" placeholder="请选择">
+            <el-option
+              v-for="item in bearing"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button size="mini" @click="editDialogVisible = false">取消</el-button>
+        <el-button size="mini" @click="saveEdit">确定</el-button>
+      </span>
+    </el-dialog>
     <!-- 删除弹框区域 -->
     <el-dialog title="删除用户" :visible.sync="delVisible" width="400px" center>
       <div align="center">删除操作不可恢复，是否确定删除？</div>
@@ -66,19 +194,28 @@
         ref="videoPlayer"
         :playsinline="true"
         :options="playerOptions"
-        @play=" onPlayerPlay( $event)" 
-        @pause=" onPlayerPause( $event)"  
-        @statechanged=" playerStateChanged( $event)" 
+        @play=" onPlayerPlay( $event)"
+        @pause=" onPlayerPause( $event)"
+        @statechanged=" playerStateChanged( $event)"
       ></video-player>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import {getSceneryByUserId, deleteScenery} from '../api/index';
+import {
+  getShareByUserId,
+  deleteShare,
+  getSceneryById,
+  toggleEssence,
+  getAllShare,
+  getByPrimaryKey,
+  getCountByUserId, toggleVisible, getAllScenery, updateShare
+} from '../api/index';
 import {mixin} from '../mixins/index';
 import VDistpicker from 'v-distpicker';
 import {mapGetters} from 'vuex'
+import {bearing, season, timeBucket, weather} from "../assets/js/options";
 export default {
   mixins: [mixin],
   data () {
@@ -110,7 +247,7 @@ export default {
           }
         ],
         // width: document.documentElement.clientWidth, //播放器宽度
-        notSupportedMessage: '此视频暂无法播放，请稍后再试', 
+        notSupportedMessage: '此视频暂无法播放，请稍后再试',
         controlBar: {
           timeDivider: true,
           durationDisplay: true,
@@ -118,6 +255,50 @@ export default {
           fullscreenToggle: true //全屏按钮
         }
       },
+      filtrateData: [],       //筛选数据
+      sort: {                 //排序信息
+        sortName: '',         //排序字段
+        type: '',             //排序方式
+      },
+      sortNameOptions: [
+        {
+          value: 'username',
+          label: '用户名'
+        },
+        {
+          value: 'createTime',
+          label: '创建时间'
+        },
+        {
+          value: 'count',
+          label: '用户总动态数'
+        }
+      ],
+      typeOptions: [
+        {
+          value: 'up',
+          label: '升序',
+        },
+        {
+          value: 'down',
+          label: '降序',
+        }
+      ],
+      editForm: {
+        id: '',
+        sceneryId: '',
+        weather: '',
+        timeBucket: '',
+        season: '',
+        bearing: '',
+      },
+      scenery: [],        // 景点列表
+      weather: [],        //天气
+      timeBucket: [],     //时段
+      season: [],         //季节
+      bearing: [],        //方位
+      editDialogVisible: false,
+
     }
   },
   computed: {
@@ -136,22 +317,35 @@ export default {
     VDistpicker
   },
   created() {
-    this.userId = this.$route.query.id;
-    this.userName = this.$route.query.name;
     this.getData();
+    this.getAllScenery();
+    this.weather = weather;
+    this.timeBucket = timeBucket;
+    this.season = season;
+    this.bearing = bearing;
   },
   watch: {
     select_word: function() {
       if (this.select_word === '') {
         this.tableData = this.tempDate;
-      } else {
+        this.filtrateData = this.tempDate;
+      } else if (this.sort.sortName === '' && this.sort.type === '') {
         this.tableData = [];
         for (let item of this.tempDate) {
-          if (item.content.includes(this.select_word)) {
+          if (item.username.includes(this.select_word)) {
+            this.tableData.push(item);
+          }
+        }
+        this.filtrateData = this.tableData;
+      } else {
+        this.tableData = [];
+        for (let item of this.filtrateData) {
+          if (item.username.includes(this.select_word)) {
             this.tableData.push(item);
           }
         }
       }
+      this.filtrateData = this.tableData;
     }
   },
   methods: {
@@ -163,7 +357,7 @@ export default {
     },
     //删除用户
     delRow() {
-      deleteScenery(this.index)
+      deleteShare(this.index)
       .then(res => {
         if (res == 1) {
           this.notify('删除成功', 'success');
@@ -181,15 +375,57 @@ export default {
     handleCurrentChange(value) {
       this.currentPage = value;
     },
-    //查询用户的动态
+    //获取所有的动态
     getData() {
       this.tempDate = [];
       this.tableData = [];
-      getSceneryByUserId(this.userId)
+      getAllShare()
       .then(res => {
-        this.tableData = res;
         this.tempDate = res;
         this.currentPage = 1;
+        this.getSceneryName();
+        this.getUserInfo();
+        this.getCountByUserId();
+        this.tableData = this.tempDate;
+        this.filtrateData = this.tempDate;
+        console.log(this.filtrateData);
+      })
+    },
+    //获取所有的景点
+    getAllScenery() {
+      getAllScenery()
+      .then(res => {
+        this.scenery = res;
+      })
+    },
+    //获取景点名
+    getSceneryName() {
+      this.tempDate.forEach(item => {
+        getSceneryById(item.sceneryId)
+          .then(res => {
+            this.$set(item,'sceneryName',res.name);
+            this.$set(item,'scenery',res);
+          })
+      })
+    },
+    //获取用户信息
+    getUserInfo() {
+      this.tempDate.forEach(item => {
+        console.log(item.userId);
+        getByPrimaryKey(item.userId)
+        .then(res => {
+          this.$set(item,'username',res.username);
+          this.$set(item,'user',res);
+        })
+      })
+    },
+    //获取用户动态数
+    getCountByUserId() {
+      this.tempDate.forEach(item => {
+        getCountByUserId(item.userId)
+        .then(res => {
+          this.$set(item,'count',res);
+        })
       })
     },
     //播放视频
@@ -205,6 +441,104 @@ export default {
     //关闭弹框时关闭视频
     closePlay() {
       this.$refs.videoPlayer.player.pause();
+    },
+    //设置/取消精华
+    toggleEssence(essence, id) {
+      toggleEssence(essence,id)
+      .then(res => {
+        if (res === true) {
+          this.notify('切换成功', 'success');
+        } else {
+          this.notify('切换失败', 'error');
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    },
+    //是否可见
+    toggleVisible(visible, id) {
+      toggleVisible(visible,id)
+        .then(res => {
+          if (res === true) {
+            this.notify('切换成功', 'success');
+          } else {
+            this.notify('切换失败', 'error');
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        })
+    },
+    //处理修改
+    handleEdit(row) {
+      this.editDialogVisible = true;
+      this.editForm = {
+        id: row.id,
+        sceneryId: row.sceneryId,
+        weather: row.weather,
+        timeBucket: row.timeBucket,
+        season: row.season,
+        bearing: row.bearing
+      }
+    },
+    //上传修改
+    saveEdit() {
+      let params = new URLSearchParams();
+      params.append('id',this.editForm.id);
+      params.append('sceneryId', this.editForm.sceneryId);
+      params.append('weather', this.editForm.weather);
+      params.append('timeBucket', this.editForm.timeBucket);
+      params.append('season', this.editForm.season);
+      params.append('bearing', this.editForm.bearing);
+      updateShare(params)
+      .then(res => {
+        if (res.code === 1) {
+          this.notify(res.msg,'success');
+          this.editDialogVisible = false;
+          this.getData();
+        } else {
+          this.notify(res.msg,'error');
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    },
+    //处理排序
+    handleSort() {
+      if (this.sort.sortName === 'username') {
+        switch (this.sort.type) {
+          case 'up':
+            this.tableData = this.filtrateData.sort(function (a, b) {
+              return a.username < b.username ? -1 : a.username > b.username ? 1 : 0;
+          })
+                break;
+          case 'down': this.tableData = this.filtrateData.sort(function (a, b) {
+              return a.username < b.username ? 1 : a.username > b.username ? -1 : 0;
+          })
+        }
+      } else if (this.sort.sortName === 'createTime') {
+        switch (this.sort.type) {
+          case 'up': this.tableData = this.filtrateData.sort(function (a, b) {
+            return a.createTime < b.createTime ? -1 : a.createTime > b.createTime ? 1 : 0;
+          })
+            break;
+          case 'down': this.tableData = this.filtrateData.sort(function (a, b) {
+            return a.createTime < b.createTime ? 1 : a.createTime > b.createTime ? -1 : 0;
+          })
+        }
+      } else if (this.sort.sortName === 'count') {
+        switch (this.sort.type) {
+          case 'up': this.tableData = this.filtrateData.sort(function (a, b) {
+            return a.count - b.count;
+          })
+            break;
+          case 'down': this.tableData = this.filtrateData.sort(function (a, b) {
+            return b.count - a.count;
+          })
+        }
+      }
     }
   }
 }
@@ -231,7 +565,13 @@ export default {
   .handle-input {
     width: 300px;
     display: inline-block;
-    margin: 0px 10px;
+    margin: 0 10px;
+  }
+
+  .handle-select {
+    width: 150px;
+    display: inline-block;
+    margin: 0 10px;
   }
 
   .pagination {

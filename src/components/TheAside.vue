@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar">
-    <el-menu 
+    <el-menu
       class="sidebar-el-menu"
       :default-active="onRoutes"
       :collapse="collapse"
@@ -30,13 +30,18 @@ export default {
       items: [
         {
           icon: 'el-icon-document',
-          index: 'info',
-          title: '系统首页'
+          index: 'sceneryManagement',
+          title: '景点管理'
         },
         {
           icon: 'el-icon-user',
           index: 'user',
           title: '用户管理'
+        },
+        {
+          icon: 'el-icon-chat-dot-round',
+          index: 'scenery',
+          title: '动态管理'
         },
         {
           icon: 'el-icon-s-promotion',

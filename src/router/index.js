@@ -18,11 +18,12 @@ const routes = [{
         name: 'Home',
         component: () =>
             import ('../components/Home.vue'),
-        children: [{
-                path: '/info',
-                name: 'Info',
+        children: [
+          {
+                path: '/sceneryManagement',
+                name: 'SceneryManagement',
                 component: () =>
-                    import ('../views/InfoPage.vue')
+                    import ('../views/SceneryManagement.vue')
             },
             {
                 path: '/user',
@@ -37,22 +38,16 @@ const routes = [{
                     import ('../views/FeedbackPage.vue')
             },
             {
-                path: '/infoStatistics',
-                name: 'InfoStatistics',
-                component: () =>
-                    import ('../views/InfoStatisticsPage.vue')
-            },
-            {
                 path: '/scenery',
                 name: 'Scenery',
                 component: () =>
                     import ('../views/SceneryPage.vue')
             },
             {
-                path: '/casual',
-                name: 'Casual',
-                component: () =>
-                    import ('../views/CasualPage.vue')
+              path: '/infoStatistics',
+              name: 'InfoStatistics',
+              component: () =>
+                import ('../views/InfoStatistics.vue')
             },
         ]
     }
