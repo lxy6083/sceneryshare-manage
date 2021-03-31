@@ -3,7 +3,7 @@
     <!-- 操作区域 -->
     <div class="container">
       <div class="handle-box">
-        <el-button type="primary" size="mini" @click="delAll">批量删除</el-button>
+        <el-button type="danger" size="mini" @click="delAll">批量删除</el-button>
         <el-input v-model="select_word" size="mini" placeholder="筛选用户" class="handle-input"></el-input>
         <el-select
           v-model="sort.sortName"
