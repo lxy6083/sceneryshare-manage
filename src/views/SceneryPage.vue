@@ -310,7 +310,7 @@ export default {
       'isPlay'
     ]),
     player () {
-      return this. $refs. videoPlayer. player
+      return this. $refs.videoPlayer.player
     }
   },
   components: {
