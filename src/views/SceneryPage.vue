@@ -10,7 +10,7 @@
           placeholder="请选择排序字段"
           class="handle-select"
           size="mini"
-          @change="handleSort()">
+          @change="handleSort">
           <el-option
             v-for="item in sortNameOptions"
             :key="item.value"
@@ -24,7 +24,7 @@
           placeholder="请选择排序方式"
           class="handle-select"
           size="mini"
-          @change="handleSort()">
+          @change="handleSort">
           <el-option
             v-for="item in typeOptions"
             :key="item.value"

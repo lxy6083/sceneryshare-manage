@@ -96,7 +96,14 @@
           <el-date-picker v-model="registerForm.birthday" placeholder="选择日期"></el-date-picker>
         </el-form-item>
         <el-form-item label="所在地" size="mini" class="pro_ct_dis">
-          <v-distpicker :province="registerForm.province" :city="registerForm.city" :area="registerForm.district" @province="onChangeProvince" @city="onChangeCity" @area="onChangeDistrict"></v-distpicker>
+          <v-distpicker
+            :province="registerForm.province"
+            :city="registerForm.city"
+            :area="registerForm.district"
+            @province="onChangeProvince"
+            @city="onChangeCity"
+            @area="onChangeDistrict">
+          </v-distpicker>
         </el-form-item>
       </el-form>
       <span slot="footer">
