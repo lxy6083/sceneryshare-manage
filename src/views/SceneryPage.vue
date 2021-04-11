@@ -517,6 +517,7 @@ export default {
           case 'down': this.tableData = this.filtrateData.sort(function (a, b) {
               return a.username < b.username ? 1 : a.username > b.username ? -1 : 0;
           })
+                break;
         }
       } else if (this.sort.sortName === 'createTime') {
         switch (this.sort.type) {
@@ -527,6 +528,7 @@ export default {
           case 'down': this.tableData = this.filtrateData.sort(function (a, b) {
             return a.createTime < b.createTime ? 1 : a.createTime > b.createTime ? -1 : 0;
           })
+            break;
         }
       } else if (this.sort.sortName === 'count') {
         switch (this.sort.type) {
@@ -537,6 +539,7 @@ export default {
           case 'down': this.tableData = this.filtrateData.sort(function (a, b) {
             return b.count - a.count;
           })
+                break;
         }
       }
     }
