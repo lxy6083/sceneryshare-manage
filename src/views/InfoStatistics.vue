@@ -62,7 +62,8 @@ export default {
     return {
       userNum: '',      //用户数
       sceneryNum: '',   //景点数
-      shareNum: ''      //动态数
+      shareNum: '',      //动态数
+      userOptions: [],   //用户表单的选项
     }
   },
   methods: {
