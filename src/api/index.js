@@ -75,3 +75,8 @@ export const getAllFeedback = () => get(`/feedback/getAllFeedback`);
 
 //回复意见
 export const reply = (params) => post(`/feedback/reply`, params);
+
+/* =======================信息统计相关函数====================== */
+
+//最近七天新增数据
+export const getLatestWeekNew = () => get(`/info/getLatestWeekNew`);
