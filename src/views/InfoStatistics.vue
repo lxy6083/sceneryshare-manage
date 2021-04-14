@@ -45,6 +45,14 @@
       </el-col>
     </el-row>
     <el-row :gutter="20" style="margin-bottom: 20px">
+      <el-row :gutter="20" style="margin-bottom: 20px">
+        <el-col :span="12">
+          <ve-pie :data="sexRatio" :settings="sexRatioSettings" :extend="sexRatioExtend"></ve-pie>
+        </el-col>
+        <el-col :span="12">
+
+        </el-col>
+      </el-row>
       <el-col :span="12">
         <ve-line :data="latestWeekNew" :settings="latestWeekNewSettings" :extend="latestWeekNewExtend"></ve-line>
       </el-col>
@@ -60,14 +68,26 @@ import {getAllScenery, getAllShare, getAllUser, getLatestWeekNew} from "../api";
 
 export default {
   name: "InfoStatistics",
-  created() {
-    this.getSum();
-  },
+
   data() {
     return {
-      userNum: '',       //用户数
-      sceneryNum: '',    //景点数
+      userNum: '',      //用户数
+      sceneryNum: '',   //景点数
       shareNum: '',      //动态数
+      userOptions: [],   //用户表单的选项
+      sexRatio: {        //男女比例
+        columns: ['日期', '用户数', '景点数', '动态数'],
+        rows: [],
+      },
+      sexRatioSettings: {
+        stack: {
+          '类别': ['用户数', '景点数', '动态数']
+        }
+      },
+
+      //所在区域排行
+      //发送动态最多的用户排行
+      //景点在动态中出现次数排行
       latestWeekNewSettings: {
         stack: {
           '类别': ['用户数', '景点数', '动态数']
@@ -78,6 +98,11 @@ export default {
         rows: [],
       },
       latestWeekNewExtend: {
+        title: {
+          text: "最近七天新增数据图",
+          left: "42%",
+          bottom: "46%",
+        },
         yAxis: {
           type: 'value',
           minInterval: 1
@@ -100,19 +125,28 @@ export default {
       },
     }
   },
+  created() {
+    this.getSum();
+    this.getLatestWeekNew();
+    this.getLatestWeekSum();
+  },
   methods: {
     //获取总数
     getSum() {
       this.getUserNum();
       this.getShareNum();
       this.getSceneryNum();
-      this.getLatestWeekNew();
     },
-    //获取用户总数
+    //获取用户统计数据
     getUserNum() {
       getAllUser()
       .then(res => {
         this.userNum = res.length;
+        for (let item of res) {
+          if (item.sex == 0) {
+
+          }
+        }
       })
       .catch(err => {
         console.log(err);
@@ -148,6 +182,7 @@ export default {
     },
     //获取最近七天总数
     getLatestWeekSum() {
+      this.getSum();
       let rows = this.latestWeekNew.rows;
       let currentUserSum = this.userNum;
       let currentScenerySum = this.sceneryNum;
