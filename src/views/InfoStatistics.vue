@@ -292,40 +292,45 @@ export default {
         }
         for (let prop in shareUser) {
           getByPrimaryKey(prop)
-            .then(res => {
-              shareUserList.push({'用户名': res.username, '动态数': shareUser[prop]});
+            .then(result => {
+              shareUserList.push({'用户名': result.username, '动态数': shareUser[prop]});
             })
-          .catch(err => {
-            console.log(err);
+          .catch(error => {
+            console.log(error);
           })
         }
         for (let prop in sceneryShare) {
           getSceneryById(prop)
-          .then(res => {
-            sceneryShareList.push({'景点名': res.name, '出现次数': sceneryShare[prop]});
+          .then(rst => {
+            sceneryShareList.push({'景点名': rst.name, '出现次数': sceneryShare[prop]});
           })
-          .catch(err => {
-            console.log(err);
+          .catch(error => {
+            console.log(error);
           })
         }
-        if (shareUserList.length > 7) {
-          this.shareUserSort.rows = shareUserList.sort((a,b) => {
-            return b['动态数'] - a['动态数'];
-          }).splice(0,7);
-        } else {
-          this.shareUserSort.rows = shareUserList.sort((a,b) => {
+
+        setTimeout(() => {
+          shareUserList = shareUserList.sort((a,b) => {
             return b['动态数'] - a['动态数'];
           })
-        }
-        if (sceneryShareList.length > 7) {
-          this.sceneryShareSort.rows = sceneryShareList.sort((a, b) => {
-            return b['出现次数'] - a['出现次数'];
-          }).splice(0,7);
-        } else {
-          this.sceneryShareSort.rows = sceneryShareList.sort((a, b) => {
+          sceneryShareList = sceneryShareList.sort((a, b) => {
             return b['出现次数'] - a['出现次数'];
           })
-        }
+          if (shareUserList.length > 7) {
+            this.shareUserSort.rows = shareUserList.splice(0,7);
+          } else {
+            this.shareUserSort.rows = shareUserList.sort((a,b) => {
+              return b['动态数'] - a['动态数'];
+            })
+          }
+          if (sceneryShareList.length > 7) {
+            this.sceneryShareSort.rows = sceneryShareList.splice(0,7);
+          } else {
+            this.sceneryShareSort.rows = sceneryShareList;
+          }
+        },100)
+
+
       })
     },
     //获取最近七天数据
@@ -346,11 +351,9 @@ export default {
     getLatestWeekSum() {
       this.getSum();
       let rows = this.latestWeekNew.rows;
-      console.log(rows);
       let currentUserSum = this.userNum;
       let currentScenerySum = this.sceneryNum;
       let currentShareSum = this.shareNum;
-      console.log(currentUserSum,currentScenerySum,currentShareSum);
       for (let i = rows.length - 1; i >= 0; i--) {
         if ( i - 1 < 0 || i === rows.length - 1) {
           this.latestWeekSum.rows.unshift({'日期': rows[i]['日期'],'用户数': currentUserSum, '景点数': currentScenerySum, '动态数': currentShareSum});
