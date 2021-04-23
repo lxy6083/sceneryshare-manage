@@ -121,7 +121,7 @@
       </el-pagination>
     </div>
     <!-- 修改弹框区域 -->
-    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="400px" center>
+    <el-dialog title="动态属性纠错" :visible.sync="editDialogVisible" width="400px" center>
       <el-form :model="editForm" ref="editForm" label-width="80px">
         <el-form-item prop="sceneryId" label="景点" size="mini">
           <el-select v-model="editForm.sceneryId" placeholder="请选择">
