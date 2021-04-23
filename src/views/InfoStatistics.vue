@@ -328,19 +328,20 @@ export default {
           } else {
             this.sceneryShareSort.rows = sceneryShareList;
           }
-        },100)
+        },1000)
 
 
       })
     },
     //获取最近七天数据
     getLatestWeekNew() {
+      this.latestWeekNew.rows = [];
       getLatestWeekNew()
       .then(res => {
-        this.latestWeekNew.rows = [];
         for (let item of res) {
           this.latestWeekNew.rows.push({'日期': item.date, '用户数': item.user, '景点数': item.scenery, '动态数': item.share});
         }
+        console.log(this.latestWeekNew);
         this.getLatestWeekSum();
       })
       .catch(err => {
@@ -355,18 +356,18 @@ export default {
         let currentUserSum = this.userNum;
         let currentScenerySum = this.sceneryNum;
         let currentShareSum = this.shareNum;
-        this.latestWeekNew.rows = [];
+        this.latestWeekSum.rows = [];
         for (let i = rows.length - 1; i >= 0; i--) {
           if ( i - 1 < 0 || i === rows.length - 1) {
             this.latestWeekSum.rows.unshift({'日期': rows[i]['日期'],'用户数': currentUserSum, '景点数': currentScenerySum, '动态数': currentShareSum});
           } else {
             this.latestWeekSum.rows.unshift({'日期': rows[i]['日期'],'用户数': currentUserSum - rows[i+1]['用户数'], '景点数': currentScenerySum - rows[i+1]['景点数'], '动态数': currentShareSum - rows[i+1]['动态数']});
-            currentUserSum -= rows[i]['用户数'];
-            currentScenerySum -= rows[i]['景点数'];
-            currentShareSum -= rows[i]['动态数'];
+            currentUserSum -= rows[i+1]['用户数'];
+            currentScenerySum -= rows[i+1]['景点数'];
+            currentShareSum -= rows[i+1]['动态数'];
           }
         }
-      },100)
+      },1000)
     },
     // quickSort(arr) {
     //   if (arr.length <= 1) { return arr; }

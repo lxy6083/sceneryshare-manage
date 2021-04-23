@@ -21,7 +21,18 @@
         </template>
       </el-table-column>
     </el-table>
-
+    <!-- 分页组件 -->
+    <div class="pagination">
+      <el-pagination
+        background
+        layout="total,prev,pager,next"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :total="feedback.length"
+        @current-change="handleCurrentChange"
+      >
+      </el-pagination>
+    </div>
     <el-dialog title="回复" :visible.sync="replyVisible" width="400px" center>
       <el-input
         type="textarea"
@@ -73,7 +84,7 @@ export default {
 
     getUserName() {
       this.feedback.forEach(item => {
-        getByPrimaryKey(item.id)
+        getByPrimaryKey(item.userId)
         .then(res => {
           this.$set(item,'username',res.username);
         })
@@ -102,11 +113,18 @@ export default {
       .catch(err => {
         this.notify(err,'error');
       })
-    }
+    },
+    //获取并更改当前页
+    handleCurrentChange(value) {
+      this.currentPage = value;
+    },
   }
 }
 </script>
 
 <style scoped>
-
+.pagination {
+  display: flex;
+  justify-content: center;
+}
 </style>
